@@ -1,0 +1,290 @@
+# Author: Robert Gama: Users, Comments
+# Author: Christine Trujillo: Articles, Tags
+# File: test_server.tavern.yalm
+# Resources: https://tavern.readthedocs.io/en/latest/examples.html
+
+# #Users
+# test_name: Change password for user that does not exist
+
+# stages:
+#   - name: Change password for user that does not exist
+#     request:
+#       url: http://localhost:5001/users/edit_password/
+#       auth:
+#         - "user"
+#         - "password"
+#       json:
+#         password: "newpassword"
+#       method: POST
+#       headers:
+#         content-type: application/json
+#     response:
+#       status_code: 404
+  
+# test_name: Create a user, change password, delete user, change password for deleted user
+  
+# stages:
+#   - name: Make user
+#     request:
+#       url: "http://localhost:5001/users/register_user/"
+#       json:
+#         name: "newuser"
+#         email: "newuser@gmail.com"
+#         password: "password"
+#       method: POST
+#       headers:
+#         content-type: application/json
+#     response:
+#       status_code: 201
+#       body: 
+#         message: User successfully created!
+
+#   - name: Change the users password
+#     request:
+#       url: "http://localhost:5001/users/edit_password/4/"
+#       auth:
+#         - "newuser"
+#         - "password"
+#       json:
+#         password: "newpassword"
+#       method: POST
+#       headers:
+#         content-type: application/json
+#     response:
+#       status_code: 201
+ 
+#   - name: Make delete user
+#     request:
+#       url: http://localhost:5001/users/delete_user/4/
+#       auth:
+#         - "newuser"
+#         - "newpassword"
+#       method: DELETE
+#       headers:
+#         content-type: application/json
+#     response:
+#       status_code: 200
+
+#   - name: Change the password for deleted user
+#     request:
+#       url: http://localhost:5001/users/edit_password/4/
+#       auth:
+#         - "newuser"
+#         - "newpassword"
+#       json:
+#         password: "password"
+#       method: POST
+#       headers:
+#         content-type: application/json
+#     response:
+#       status_code: 
+#         - 404
+#         - 401
+
+
+# #articles
+# test_name: Try to post an article without authenticating
+# stages:
+#   - name: Post article
+#     request:
+#       url: http://localhost:5000/articles/new_article/
+#       json:
+#           data:
+#               title: "Testing Title"
+#               content: "Test Content"
+#       method: POST
+#     response:
+#       status_code: 401
+
+# test_name: Try to post an article using the wrong password
+# stages:
+#   - name: Post article
+#     request:
+#       url: http://localhost:5000/articles/new_article/
+#       json:
+#           auth:
+#               -"username"
+#               -"wrongpass"
+#           data:
+#               title: "Testing Title"
+#               content: "Test Content"
+#       method: POST
+#     response:
+#       status_code: 401
+
+# test_name: create user
+# stages:
+#   - name: create user
+#     request:
+#       url: http://localhost:5001/users/register_user/
+#       json:
+#           name: "newuser"
+#           email: "newemail@gmail.com"
+#           password: "12345"
+#       method: POST
+#       headers:
+#           content-type: application/json
+#     response:
+#       status_code: 201
+
+# test_name: Post an article successfully
+# stages:
+#   - name: Post article
+#     request:
+#       url: http://localhost:5000/articles/new_article/
+#       auth:
+#           - newemail
+#           - "12345"
+#       json:
+#           title: "Testing Title"
+#           content: "Test Content"
+#       method: POST
+#     response:
+#       status_code: 201
+
+# test_name: Retrieve the newly posted article
+# stages:
+#   - name: Retrieve article
+#     request:
+#       url: http://localhost:5000/articles/4/
+#       method: GET
+#       headers:
+#           content-type: application/json
+#     response:
+#       status_code: 200
+
+# test_name: Check that the newly posted article is the most recent
+# stages:
+#   - name: Retrieve most recent article
+#     request:
+#       url: http://localhost:5000/articles/metadata/1/
+#       method: GET
+#       headers:
+#           content-type: application/json
+#     response:
+#       status_code: 200
+
+#tags
+test_name: Add an article with a new tag
+stages:
+  - name: Add a tag to a non existing article
+    request:
+      url: http://localhost:5002/tag/new/1
+      json:
+          tag: "cool"
+      method: POST
+      headers:
+          content-type: application/json
+    response:
+      status_code: 401
+
+test_name: Add a new tag to an article
+stages:
+  - name: Add a tag to an existing article
+    request:
+      url: http://localhost:5002/tag/edit/4
+      auth:
+        - newemail
+        - "12345"
+      json:
+          tag: "cool"
+      method: POST
+      headers:
+          content-type: application/json
+    response:
+      status_code: 201
+
+test_name: List all articles with the new tag
+stages:
+  - name: List artles with new tag
+    request:
+      url: http://localhost:5002/tags/list_url/cool
+      method: GET
+      headers:
+          content-type: application/json
+    response:
+      status_code: 200
+
+test_name: Delete one of the tags from the article
+stages:
+  - name: Delete one of the tags from the article
+    request:
+      url: http://localhost:5002/tag/delete/1
+      auth:
+        - newemail
+        - "12345"
+      method: DELETE
+      headers:
+          content-type: application/json
+    response:
+      status_code: 201
+
+test_name: Add a new tag to an article
+stages:
+  - name: Add a tag to an existing article
+    request:
+      url: http://localhost:5002/tag/edit/10
+      auth:
+        - newemail
+        - "12345"
+      json:
+          tag: "cool"
+      method: POST
+      headers:
+          content-type: application/json
+    response:
+      status_code: 404
+
+
+# #comments
+# test_name: Comments
+
+# stages:
+#   - name: Add comment to non-existing articles
+#     request:
+#       url: http://localhost:5003/comment/new/
+#       json: 
+#         comment: New comment!
+#       method: POST
+#       headers:
+#         content-type: application/json
+#     response:
+#       status_code: 404
+    
+#   - name: Post an anonymous comment on an article
+#     request:
+#       url: http://localhost:5003/comment/new/1
+#       json:
+#         comment: New Comment!
+#       method: POST
+#       headers:
+#         content-type: application/json
+#     response:
+#       status_code: 201
+#   - name: Post an authenticated comment on an article
+#     request:
+#       url: http://localhost:5003/comment/new/1
+#       json:
+#         comment: newer comment
+#       method: POST
+#       headers:
+#         content-type: application/json
+#     response:
+#       status_code: 201
+
+# test_name: Comments order
+
+# stages:
+#   - name: Check that the comments are returned in order
+#     request:
+#       url: http://localhost:5003/comment/recent/1/3
+#       method: GET
+#       headers:
+#         content-type: application/json
+#     response:
+#       status_code: 201
+#       body:
+#         - comment: cool content
+#         - comment: cool content1
+#         - comment: cool content2
+  
