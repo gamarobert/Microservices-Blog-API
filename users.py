@@ -72,7 +72,7 @@ def register():
     if request.method == 'POST':
         
         stmt = session.prepare("INSERT INTO testkeyspace.users (user_id, name, username, email, password) VALUES (uuid(), ?, ?, ?, ?)")
-        query = session.execute(stmt, ( name, username, email, hashed_pw))
+        session.execute(stmt, ( name, username, email, hashed_pw))
 
         message = {
             'message': 'User successfully created!'
@@ -91,7 +91,7 @@ def delete_user(uid):
 
     if request.method == 'DELETE':
         
-        delete_row = session.execute("DELETE FROM testkeyspace.users WHERE user_id = " + str(uid))
+        session.execute("DELETE FROM testkeyspace.users WHERE user_id = " + str(uid))
 
         message = {
             'message': 'successfully deleted.'
@@ -102,40 +102,34 @@ def delete_user(uid):
         
         return resp
     
-    elif user is None:
-        return db_error()
     
 
-# # curl --include --verbose --header 'Content-Type: application/json' --user "username" --data '{"password": "editedpassword"}' http://localhost:5000/users/edit_password/<int:uid>/
-# @app.route('/users/edit_password/<int:uid>/', methods=['POST'])
-# # @basic_auth.required
-# def edit_password(uid):
+# curl --include --verbose --header 'Content-Type: application/json' --user "username" --data '{"password": "editedpassword"}' http://localhost:5000/users/edit_password/<int:uid>/
+@app.route('/users/edit_password/<uid>/', methods=['POST'])
+# @basic_auth.required
+def edit_password(uid):
 
-#     user = dbf.query_db("SELECT * FROM users WHERE uid=?", [uid], one=True)
+    # user = dbf.query_db("SELECT * FROM users WHERE uid=?", [uid], one=True)
+    user = session.execute("SELECT * FROM users WHERE uid=" + str(uid))
 
-#     if user is not None:
+    if user[0] is not None:
 
-#         password = request.json['password']
-#         hashed_pw = sha256_crypt.encrypt(password)
+        password = request.json['password']
+        hashed_pw = sha256_crypt.encrypt(password)
 
-#         if request.method == 'POST':
-#             cur = dbf.get_db().cursor()
-#             db = dbf.get_db()
+        if request.method == 'POST':
+            # cur.execute("UPDATE users SET password=? WHERE uid=?", 
+            #             (hashed_pw, uid))
+            
+            stmt = session.prepare("UPDATE testkeyspace.users SET password=? WHERE uid=" + str(uid))
+            session.execute(stmt, [hashed_pw])
 
-#             cur.execute("UPDATE users SET password=? WHERE uid=?", 
-#                         (hashed_pw, uid))
-#             db.commit()
-#             cur.close()
+            message = {'message': 'Password updated!'}
+            resp = jsonify(message)
+            resp.status_code = 201
 
-#             message = {
-#                 'message': 'Password updated!'
-#             }
+            return resp
 
-#             resp = jsonify(message)
-#             resp.status_code = 201
-
-#             return resp
-
-#     elif user is None:
-#             return not_found()
+    elif user[0] is None:
+            return not_found()
 

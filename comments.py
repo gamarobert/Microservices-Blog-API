@@ -13,11 +13,18 @@ import sqlite3
 import commentsdb as dbf
 from datetime import datetime
 from basicauth import SubBasicAuth
-
+from cassandra.cluster import Cluster
 
 app = Flask(__name__)
+
 basic_auth = SubBasicAuth(app)
 basic_auth.init_app(app)
+
+cluster = Cluster(['172.17.0.2'])
+
+session = cluster.connect()
+session.set_keyspace('testkeyspace')
+
 
 @app.errorhandler(404)
 def not_found(error=None):
@@ -35,23 +42,27 @@ def not_found(error=None):
 def root():
     return "hello"
 
-@app.route('/comments/new/<int:id>', methods = ['GET', 'POST'])
+@app.route('/comments/new/<id>', methods = ['GET', 'POST'])
 def new_comment(id):
 
-    query = dbf.query_db("SELECT * FROM articles WHERE article_id=?", [id], one=True)
-   
-    if request.method == 'POST' and query is not None:
+    # query = dbf.query_db("SELECT * FROM articles WHERE article_id=?", [id], one=True)
+    query = session.execute("SELECT * FROM testkeyspace.articles WHERE article_id=" + str(id))
+
+    if request.method == 'POST' and query[0] is not None:
         article_id = query['article_id']
         comment = request.json['comment']
         url = "http://localhost/articles/" + str(article_id)
 
-        cur = dbf.get_db().cursor()
-        db = dbf.get_db()
+        # cur = dbf.get_db().cursor()
+        # db = dbf.get_db()
         
         if basic_auth.authenticate() == True:
             
             auth = request.authorization
-            cur.execute("INSERT INTO comments (comment, article_url, user_name) VALUES (?, ?, ?)", (comment, url, auth.username))
+            # cur.execute("INSERT INTO comments (comment, article_url, user_name) VALUES (?, ?, ?)", (comment, url, auth.username))
+            stmt = session.prepare("INSERT INTO testkeyspace.comments (comment_id, comment, article_url, author, date_published) VALUES (uuid(),?,?,?, toTimeStamp(now()))") 
+            session.execute(stmt, (comment, url, auth))
+
             msg = { 'message' : 'Comment has been added'}
             resp = jsonify(msg)
             resp.status_code = 201
@@ -60,71 +71,80 @@ def new_comment(id):
         
         elif basic_auth.authenticate() != True:
 
-            cur.execute("INSERT INTO comments (comment, article_url, user_name) VALUES (?, ?, ?)", (comment, url, "Anonymous Coward"))
-            msg = { 'message' : 'Comment has been added you coward..'}
+            # cur.execute("INSERT INTO comments (comment, article_url, user_name) VALUES (?, ?, ?)", (comment, url, "Anonymous Coward"))
             
+            stmt = session.prepare("INSERT INTO testkeyspace.comments (comment_id, comment, article_url, author, date_published) VALUES (uuid(),?,?, \"Anonymous Coward\", toTimeStamp(now()))") 
+            session.execute(stmt, (comment, url))
+            
+            msg = { 'message' : 'Comment has been added you coward..'}
             resp = jsonify(msg)
             resp.status_code = 201
 
             return resp
 
-        elif query is None:
+        elif query[0] is None:
             return not_found()
 
 
-@app.route('/comments/delete/<string:article_id>/<int:comment_id>', methods = ['POST', 'GET', 'DELETE'])
+@app.route('/comments/delete/<article_id>/<comment_id>', methods = ['POST', 'GET', 'DELETE'])
 # @basic_auth.required
 def delete_comment(article_id,comment_id):
 
-    url = "http://localhost/articles/" + article_id
+    url = "http://localhost/articles/" + str(article_id)
 
-    query = dbf.query_db("SELECT comment FROM comments WHERE article_url=?", [url], one = True)
+    # query = dbf.query_db("SELECT comment FROM comments WHERE article_url=?", [url], one = True)
+    query = session.execute("SELECT comment FROM testkeyspace.comments WHERE article_url=" str(url))
 
-    if request.method == 'DELETE' and query is not None:
-        cur = dbf.get_db().cursor()
-        db = dbf.get_db()
-        cur.execute("DELETE FROM comments WHERE article_url = ? AND comment_id = ?", [url,comment_id])
+    if request.method == 'DELETE' and query[0] is not None:
+        # cur = dbf.get_db().cursor()
+        # db = dbf.get_db()
+        # cur.execute("DELETE FROM comments WHERE article_url = ? AND comment_id = ?", [url,comment_id])
+        
+        stmt = session.prepare("DELETE FROM testkeyspace.comments WHERE article_url = ? AND comment_id=?")
+        session.execute(stmt, (url, comment_id))
 
-        db.commit()
-        cur.close()
+        # db.commit()
+        # cur.close()
 
         msg = { 'message' : 'comment deleted...' }
-
         resp = jsonify(msg)
         resp.status_code = 201
-
         return resp
-    elif query is None:
+
+    elif query[0] is None:
         return not_found()
 
-@app.route('/comments/count/<string:article_id>', methods= ['GET'])
+@app.route('/comments/count/<article_id>', methods= ['GET'])
 def count_comments(article_id):
 
     if request.method == 'GET':
-        url = "http://localhost/articles/" + article_id
+        url = "http://localhost/articles/" + str(article_id)
         
-        number = dbf.query_db("SELECT COUNT(article_url) as count FROM comments WHERE article_url=?", [url], one=True)
-        num = number['count']
+        # number = dbf.query_db("SELECT COUNT(article_url) as count FROM comments WHERE article_url=?", [url], one=True)
+        
+        stmt = session.prepare("SELECT COUNT(article_url) as count FROM testkeyspace.comments WHERE article_url=" str(article_id))
+        number = session.execute(stmt, [url])
+        num = number[0].count
 
-        comments = dbf.query_db("SELECT * FROM comments WHERE article_url=(?)", [url], one=True)
+        # comments = dbf.query_db("SELECT * FROM comments WHERE article_url=(?)", [url], one=True)
+        comments = session.execute("SELECT * FROM testkeyspace.comments WHERE article_url=?" + str(article_id) + " ALLOW FILTERING")
         
         msg = { 'numOfComments': str(num) }
-
-        
-
         resp = jsonify(msg)
         resp.status_code = 200
-        resp.headers['Last-Modified'] = str(datetime.strptime(comments['date_published'], "%Y-%m-%d %H:%M:%f"))
+        resp.headers['Last-Modified'] = str(datetime.strptime(comments[0].date_published, "%Y-%m-%d %H:%M:%f"))
 
         return resp
 
 
-@app.route('/comments/recent/<string:id>/<int:n>', methods=['GET'])
+@app.route('/comments/recent/<id>/<n>', methods=['GET'])
 def recent_comments(id, n):
 
-    url = "http://localhost/articles/" + id
-    comment = dbf.query_db("SELECT * FROM comments WHERE article_url=? ORDER BY comment ASC LIMIT ?",[url, n])
+    url = "http://localhost/articles/" + str(id)
 
+    comment = dbf.query_db("SELECT * FROM testkeyspace.comments WHERE article_url=? ORDER BY comment ASC LIMIT ?",[url, n])
+    # stmt = session.prepare("SELECT * FROM comments WHERE article_url=?")
+    
     comment_arr = []
     
     if request.method == 'GET' and comment is not None:

@@ -159,10 +159,13 @@ def delete_article(id):
         return not_found()
  
 # # curl --include --verbose --header 'Content-Type: application/json' http://localhost:5000/articles/retrieve_articles/2/
-@app.route('/articles/retrieve_articles/<int:num>/', methods=['GET'])
+@app.route('/articles/retrieve_articles/<num>/', methods=['GET'])
 def retrieve_articles(num):
     
     articles = dbf.query_db("SELECT * FROM articles ORDER BY article_id DESC LIMIT (?)", [num])
+
+    stmt = session.prepare("SELECT * FROM testkeyspace.articles WHERE category=\"article\" ORDER BY last_modified DESC LIMIT ?")
+    session.execute(stmt, [num])
 
     # will hold all articles 
     articles_msg = []
