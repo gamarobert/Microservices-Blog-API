@@ -28,8 +28,8 @@ session.execute(
         content text,
         date_published timestamp,
         last_modified timestamp,
-        PRIMARY KEY (article_id, last_modified)
-    ) WITH CLUSTERING ORDER BY (last_modifed DESC)"""
+        PRIMARY KEY ((article_id), date_published)
+    ) WITH CLUSTERING ORDER BY (date_published DESC)"""
 )
 
 session.execute(
