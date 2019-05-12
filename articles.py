@@ -147,65 +147,65 @@ def delete_article(id):
     elif found_article is None:
         return not_found()
  
-# # curl --include --verbose --header 'Content-Type: application/json' http://localhost:5000/articles/retrieve_articles/2/
-# @app.route('/articles/retrieve_articles/<num>/', methods=['GET'])
-# def retrieve_articles(num):
+# curl --include --verbose --header 'Content-Type: application/json' http://localhost/articles/retrieve_articles/3/
+@app.route('/articles/retrieve_articles/<int:num>/', methods=['GET'])
+def retrieve_articles(num):
     
-#     # articles = dbf.query_db("SELECT * FROM articles ORDER BY article_id DESC LIMIT (?)", [num])
+    # articles = dbf.query_db("SELECT * FROM articles ORDER BY article_id DESC LIMIT (?)", [num])
 
-#     stmt = session.prepare("SELECT * FROM testkeyspace.articles WHERE category=\"article\" ORDER BY last_modified DESC LIMIT ?")
-#     articles = session.execute(stmt, [num])
+    articles = session.execute("SELECT * FROM testkeyspace.articles LIMIT "+ str(num))
+    # will hold all articles 
+    articles_msg = []
 
-#     # will hold all articles 
-#     articles_msg = []
-
-#     if request.method == 'GET' and articles is not None:
-#         for article in articles:
-#             articles_msg.append(
-#                 {
-#                     "article_id": article['article_id'],
-#                     "author": article['author'],
-#                     "title": article['title'],
-#                     "content": article['content'],
-#                     "date_published": article['date_published'],
-#                     "last_modified": article['last_modified']
-#                 }   
-#             )
+    if request.method == 'GET' and articles is not None:
+        for article in articles:
+            articles_msg.append(
+                {
+                    "article_id": article.article_id,
+                    "author": article.author,
+                    "title": article.title,
+                    "content": article.content,
+                    "date_published": article.date_published,
+                    "last_modified": article.last_modified
+                }   
+            )
         
-#         resp = jsonify(articles_msg)
-#         resp.status_code = 200
-#         resp.headers['Last-Modified'] = str(datetime.strptime(articles[0]['last_modified'], "%Y-%m-%d %H:%M:%f"))
+        resp = jsonify(articles_msg)
+        resp.status_code = 200
+        resp.headers['Last-Modified'] = str(datetime.strptime(articles[0]['last_modified'], "%Y-%m-%d %H:%M:%f"))
 
-#         return resp
-#     elif articles is None:
-#         return not_found()
+        return resp
+    elif articles is None:
+        return not_found()
 
-# # #  curl -i --header 'Content-Type: application/json' http://localhost:5000/articles/metadata/2/
-# @app.route('/articles/metadata/<int:num>/', methods=['GET'])
-# def retrieve_metadata(num):
+# #  curl -i --header 'Content-Type: application/json' http://localhost/articles/metadata/2/
+@app.route('/articles/metadata/<int:num>/', methods=['GET'])
+def retrieve_metadata(num):
+
+    articles = session.execute("SELECT * FROM testkeyspace.articles LIMIT "+ str(num))
+
     
-#     articles = dbf.query_db("SELECT * FROM articles ORDER BY article_id DESC LIMIT (?)", [num])
+    #articles = dbf.query_db("SELECT * FROM articles ORDER BY article_id DESC LIMIT (?)", [num])
+    # will hold all articles 
+    articles_msg = []
 
-#     # will hold all articles 
-#     articles_msg = []
-
-#     if request.method == 'GET' and articles is not None:
-#         for article in articles:
-#             articles_msg.append(
-#                 {
-#                     "author": article['author'],
-#                     "title": article['title'],
-#                     "content": article['content'],
-#                     "date_published": article['date_published'],
-#                     "url": "http:localhost/articles/retrieve_metadata/" + str(article['article_id'])
-#                 }   
-#             )
+    if request.method == 'GET' and articles is not None:
+        for article in articles:
+            articles_msg.append(
+                {
+                    "author": article.author,
+                    "title": article.title,
+                    "content": article.content,
+                    "date_published": article.date_published,
+                    "url": "http:localhost/articles/retrieve_metadata/" + str(article.article_id)
+                }   
+            )
         
-#         resp = jsonify(articles_msg)
-#         resp.status_code = 200
-#         # Not sure if this is correct, we can only add one response header
-#         resp.headers['Last-Modified'] = str(datetime.strptime(articles[0]['last_modified'], "%Y-%m-%d %H:%M:%f"))
-#         return resp
-#     elif articles is None:
-#         return not_found()
+        resp = jsonify(articles_msg)
+        resp.status_code = 200
+        # Not sure if this is correct, we can only add one response header
+        resp.headers['Last-Modified'] = str(datetime.strptime(articles[0]['last_modified'], "%Y-%m-%d %H:%M:%f"))
+        return resp
+    elif articles is None:
+        return not_found()
 
