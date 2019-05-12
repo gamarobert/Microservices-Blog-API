@@ -28,19 +28,19 @@ session.execute(
         content text,
         date_published timestamp,
         last_modified timestamp,
-        PRIMARY KEY ((article_id), last_modified)
-    )"""
+        PRIMARY KEY (article_id, last_modified)
+    ) WITH CLUSTERING ORDER BY (last_modifed DESC)"""
 )
 
-# session.execute(
-#     """CREATE TABLE IF NOT EXISTS testkeyspace.comments(
-#         comment_id uuid PRIMARY KEY,
-#         article_url text,
-#         author text,
-#         date_published text,
-#         comment text,
-#     )"""
-# )
+session.execute(
+    """CREATE TABLE IF NOT EXISTS testkeyspace.comments(
+        comment_id uuid PRIMARY KEY,
+        article_url text,
+        author text,
+        date_published timestamp,
+        comment text
+    )"""
+)
 
 # session.execute(
 #     """CREATE TABLE IF NOT EXISTS testkeyspace.tags(

@@ -54,7 +54,7 @@ def authenticate():
     return resp
 
 
-#curl --include --verbose --request POST --header 'Content-Type: application/json' --data '{"name":"name", "email":"email", "password":"password"}' http://localhost:5000/users/register_user/
+##curl --include --verbose --request POST --header 'Content-Type: application/json' --data '{"name":"name", "email":"email", "password":"password"}' http://localhost:5000/users/register_user/
 @app.route('/users/register_user/' , methods=['POST'])
 def register():
     
@@ -104,13 +104,13 @@ def delete_user(uid):
     
     
 
-# curl --include --verbose --header 'Content-Type: application/json' --user "username" --data '{"password": "editedpassword"}' http://localhost:5000/users/edit_password/<int:uid>/
+# curl --include --verbose --header 'Content-Type: application/json' --user "email" --data '{"password": "editedpassword"}' http://localhost/users/edit_password/bc549c9d-99a8-4888-8bf8-5f89a07aa373/
 @app.route('/users/edit_password/<uid>/', methods=['POST'])
 # @basic_auth.required
 def edit_password(uid):
 
     # user = dbf.query_db("SELECT * FROM users WHERE uid=?", [uid], one=True)
-    user = session.execute("SELECT * FROM users WHERE uid=" + str(uid))
+    user = session.execute("SELECT * FROM users WHERE user_id=" + str(uid))
 
     if user[0] is not None:
 
@@ -121,7 +121,7 @@ def edit_password(uid):
             # cur.execute("UPDATE users SET password=? WHERE uid=?", 
             #             (hashed_pw, uid))
             
-            stmt = session.prepare("UPDATE testkeyspace.users SET password=? WHERE uid=" + str(uid))
+            stmt = session.prepare("UPDATE testkeyspace.users SET password=? WHERE user_id=" + str(uid))
             session.execute(stmt, [hashed_pw])
 
             message = {'message': 'Password updated!'}
