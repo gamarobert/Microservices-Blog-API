@@ -42,7 +42,8 @@ def root():
     return "hello"
 
 
-# curl --include --verbose --header 'Content-Type: application/json' --user "email" --data '{"comment": "new comment"}' http://localhost/comments/new/9581b19d-05ee-40bd-8888-fbf98f0a0579/
+# curl --include --verbose --header 'Content-Type: application/json' --user "email" --data '{"comment": "new comment"}' http://localhost/comments/new/9581b19d-05ee-40bd-8888-fbf98f0a0579
+# curl --include --verbose --header 'Content-Type: application/json' --user "email" --data '{"comment": "new comment"}' http://localhost/comments/new/5c2dd169-ec3e-456f-9951-0ffd476f25ca
 @app.route('/comments/new/<id>', methods = ['GET', 'POST'])
 def new_comment(id):
 
@@ -134,15 +135,16 @@ def count_comments(article_id):
 
         return resp
 
-
+#  curl --include --verbose --header 'Content-Type: application/json' --user "email" http://localhost/comments/recent/5c2dd169-ec3e-456f-9951-0ffd476f25ca/3
 @app.route('/comments/recent/<id>/<n>', methods=['GET'])
 def recent_comments(id, n):
 
     url = "http://localhost/articles/" + str(id)
 
     #comment = dbf.query_db("SELECT * FROM testkeyspace.comments WHERE article_url=? ORDER BY comment ASC LIMIT ?",[url, n])
-    stmt = session.prepare("SELECT * FROM comments WHERE article_url=? LIMIT =?")
-    comments = session.execute(stmt, (url, n))
+    # Dynamic limit is unsupported in cql?
+    stmt = session.prepare("SELECT * FROM testkeyspace.comments WHERE article_url=? LIMIT " + str(n) + " ALLOW FILTERING")
+    comments = session.execute(stmt, [url])
 
     comment_arr = []
     
@@ -150,7 +152,7 @@ def recent_comments(id, n):
         for comment in comments:
             comment_arr.append(
                 {
-                    "comment" : comments.comment
+                    "comment" : comment.comment
                 }
             )
 
