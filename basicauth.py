@@ -12,6 +12,7 @@ session = cluster.connect()
 session.set_keyspace('testkeyspace')
 
 class SubBasicAuth(BasicAuth):
+    
     def check_credentials(self, username, password):
 
         password_cand = password

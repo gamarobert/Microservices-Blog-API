@@ -54,7 +54,7 @@ def authenticate():
     return resp
 
 
-##curl --include --verbose --request POST --header 'Content-Type: application/json' --data '{"name":"name", "email":"email", "password":"password"}' http://localhost:5000/users/register_user/
+##curl --include --verbose --request POST --header 'Content-Type: application/json' --data '{"name":"name", "email":"email", "password":"password"}' http://localhost/users/register_user/
 @app.route('/users/register_user/' , methods=['POST'])
 def register():
     

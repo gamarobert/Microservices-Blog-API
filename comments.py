@@ -135,30 +135,31 @@ def count_comments(article_id):
         return resp
 
 
-# @app.route('/comments/recent/<id>/<n>', methods=['GET'])
-# def recent_comments(id, n):
+@app.route('/comments/recent/<id>/<n>', methods=['GET'])
+def recent_comments(id, n):
 
-#     url = "http://localhost/articles/" + str(id)
+    url = "http://localhost/articles/" + str(id)
 
-#     comment = dbf.query_db("SELECT * FROM testkeyspace.comments WHERE article_url=? ORDER BY comment ASC LIMIT ?",[url, n])
-#     # stmt = session.prepare("SELECT * FROM comments WHERE article_url=?")
+    #comment = dbf.query_db("SELECT * FROM testkeyspace.comments WHERE article_url=? ORDER BY comment ASC LIMIT ?",[url, n])
+    stmt = session.prepare("SELECT * FROM comments WHERE article_url=? LIMIT =?")
+    comments = session.execute(stmt, (url, n))
+
+    comment_arr = []
     
-#     comment_arr = []
-    
-#     if request.method == 'GET' and comment is not None:
-#         for comments in comment:
-#             comment_arr.append(
-#                 {
-#                     "comment" : comments["comment"]
-#                 }
-#             )
+    if request.method == 'GET' and comments is not None:
+        for comment in comments:
+            comment_arr.append(
+                {
+                    "comment" : comments.comment
+                }
+            )
 
-#         resp = jsonify(comment_arr)
-#         resp.status_code = 200
-#         resp.headers['Last-Modified'] = str(datetime.strptime(comment[0]['date_published'], "%Y-%m-%d %H:%M:%f"))
+        resp = jsonify(comment_arr)
+        resp.status_code = 200
+        #resp.headers['Last-Modified'] = str(datetime.strptime(comment[0]['date_published'], "%Y-%m-%d %H:%M:%f"))
 
-#         return resp
+        return resp
     
-#     elif comment is None:
-#         return not_found()
+    elif comment is None:
+        return not_found()
 

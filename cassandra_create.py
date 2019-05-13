@@ -34,31 +34,32 @@ session.execute(
 
 session.execute(
     """CREATE TABLE IF NOT EXISTS testkeyspace.comments(
-        comment_id uuid PRIMARY KEY,
+        comment_id uuid,
         article_url text,
         author text,
         date_published timestamp,
-        comment text
+        comment text,
+        PRIMARY KEY ((comment_id), date_published)
+    ) WITH CLUSTERING ORDER BY (date_published DESC)"""
+)
+
+session.execute(
+    """CREATE TABLE IF NOT EXISTS testkeyspace.tags(
+        tag_id uuid PRIMARY KEY,
+        article_url text,
+        tag_name text,
     )"""
 )
 
-# session.execute(
-#     """CREATE TABLE IF NOT EXISTS testkeyspace.tags(
-#         tag_id uuid PRIMARY KEY,
-#         article_url text,
-#         tag_name text,
-#     )"""
-# )
-
-# session.execute(
-#     """CREATE TABLE IF NOT EXISTS testkeyspace.users(
-#         user_id uuid PRIMARY KEY,
-#         name text,
-#         username text,
-#         email text,
-#         password text,
-#     )"""
-# )
+session.execute(
+    """CREATE TABLE IF NOT EXISTS testkeyspace.users(
+        user_id uuid PRIMARY KEY,
+        name text,
+        username text,
+        email text,
+        password text,
+    )"""
+)
 
 # #Referenced used for inserting https://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlInsert.html
 # #Inserting Articles: 

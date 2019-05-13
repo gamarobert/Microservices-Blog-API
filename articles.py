@@ -172,9 +172,10 @@ def retrieve_articles(num):
         
         resp = jsonify(articles_msg)
         resp.status_code = 200
-        resp.headers['Last-Modified'] = str(datetime.strptime(articles[0]['last_modified'], "%Y-%m-%d %H:%M:%f"))
+        #resp.headers['Last-Modified'] = str(datetime.strptime(articles[0].last_modified, "%Y-%m-%d %H:%M:%f"))
 
         return resp
+
     elif articles is None:
         return not_found()
 
@@ -204,7 +205,7 @@ def retrieve_metadata(num):
         resp = jsonify(articles_msg)
         resp.status_code = 200
         # Not sure if this is correct, we can only add one response header
-        resp.headers['Last-Modified'] = str(datetime.strptime(articles[0]['last_modified'], "%Y-%m-%d %H:%M:%f"))
+        # resp.headers['Last-Modified'] = str(datetime.strptime(articles[0]['last_modified'], "%Y-%m-%d %H:%M:%f"))
         return resp
     elif articles is None:
         return not_found()
