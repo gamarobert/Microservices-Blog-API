@@ -47,16 +47,13 @@ def root():
 @app.route('/comments/new/<id>', methods = ['POST'])
 def new_comment(id):
 
-    # query = dbf.query_db("SELECT * FROM articles WHERE article_id=?", [id], one=True)
     query = session.execute("SELECT * FROM testkeyspace.articles WHERE article_id=" + str(id))
 
     if request.method == 'POST' and query[0] is not None:
 
         comment = request.json['comment']
+        coward = "Anonymous Coward"
         url = "http://localhost/articles/" + str(id)
-
-        # cur = dbf.get_db().cursor()
-        # db = dbf.get_db()
         
         if basic_auth.authenticate() == True:
             
@@ -75,8 +72,8 @@ def new_comment(id):
 
             # cur.execute("INSERT INTO comments (comment, article_url, user_name) VALUES (?, ?, ?)", (comment, url, "Anonymous Coward"))
             
-            stmt = session.prepare("INSERT INTO testkeyspace.comments (comment_id, comment, article_url, author, date_published) VALUES (uuid(),?,?, \"Anonymous Coward\", toTimeStamp(now()))") 
-            session.execute(stmt, (comment, url))
+            stmt = session.prepare("INSERT INTO testkeyspace.comments (comment_id, comment, article_url, author, date_published) VALUES (uuid(), ?, ?, ?, toTimeStamp(now()))") 
+            session.execute(stmt, (comment, url, coward))
             
             msg = { 'message' : 'Comment has been added you coward..'}
             resp = jsonify(msg)
@@ -112,28 +109,40 @@ def delete_comment(article_id,comment_id):
         return not_found()
 
 # curl --include --verbose --header 'Content-Type: application/json' --user "email"  http://localhost/comments/count/9581b19d-05ee-40bd-8888-fbf98f0a0579
-@app.route('/comments/count/<article_id>', methods= ['GET'])
+@app.route('/comments/count/<article_id>', methods=['GET'])
 def count_comments(article_id):
 
+    query = session.execute("SELECT * FROM testkeyspace.articles WHERE article_id=" + str(article_id))  
+
     if request.method == 'GET':
-        url = "http://localhost/articles/" + str(article_id)
-        
-        # number = dbf.query_db("SELECT COUNT(article_url) as count FROM comments WHERE article_url=?", [url], one=True)
-        
-        stmt = session.prepare("SELECT COUNT(article_url) as count FROM testkeyspace.comments WHERE article_url=? ALLOW FILTERING")
-        number = session.execute(stmt, [url])
-        num = number[0].count
+        if query[0] is not None:
+            url = "http://localhost/articles/" + str(article_id)
+            
+            stmt = session.prepare("SELECT COUNT(article_url) as count FROM testkeyspace.comments WHERE article_url=? ALLOW FILTERING")
+            number = session.execute(stmt, [url])
+            num = number[0].count
 
-        # comments = dbf.query_db("SELECT * FROM comments WHERE article_url=(?)", [url], one=True)
-        stmt = session.prepare("SELECT * FROM testkeyspace.comments WHERE article_url=? ALLOW FILTERING")
-        comments = session.execute(stmt, [url])
+            stmt = session.prepare("SELECT * FROM testkeyspace.comments WHERE article_url=? ALLOW FILTERING")
+            comments = session.execute(stmt, [url])
 
-        msg = { 'numOfComments': str(num) }
-        resp = jsonify(msg)
-        resp.status_code = 200
-        #resp.headers['Last-Modified'] = str(datetime.strptime(str(comments[0].date_published), "%Y-%m-%d %H:%M:%S.%f"))
+            datepub_str = datetime.strftime(comments[0].date_published,"%a, %d %b %Y %I:%M:%S GMT")
+            datepub_date = datetime.strptime(str(datepub_str), "%a, %d %b %Y %I:%M:%S GMT")
 
-        return resp
+            msg = { 'numOfComments': str(num) }
+            resp = jsonify(msg)
+            resp.status_code = 200
+            resp.headers['Last-Modified'] = datepub_str
+
+            if request.headers.get("If-Modified-Since") is not None:
+                if request.if_modified_since < datepub_date:
+                    return resp
+                else:
+                    resp.status_code = 304
+                    return resp
+            else:
+                return resp
+        else:
+            return not_found
 
 #  curl --include --verbose --header 'Content-Type: application/json' --user "email" http://localhost/comments/recent/5c2dd169-ec3e-456f-9951-0ffd476f25ca/3
 @app.route('/comments/recent/<id>/<n>', methods=['GET'])
@@ -141,27 +150,38 @@ def recent_comments(id, n):
 
     url = "http://localhost/articles/" + str(id)
 
-    #comment = dbf.query_db("SELECT * FROM testkeyspace.comments WHERE article_url=? ORDER BY comment ASC LIMIT ?",[url, n])
     # Dynamic limit is unsupported in cql?
     stmt = session.prepare("SELECT * FROM testkeyspace.comments WHERE article_url=? LIMIT " + str(n) + " ALLOW FILTERING")
     comments = session.execute(stmt, [url])
-    date_published = comments[0].date_published
+    
+    datepub_str = datetime.strftime(comments[0].date_published, "%a, %d %b %Y %I:%M:%S GMT")
+
+    datepub_date = datetime.strptime(str(datepub_str), "%a, %d %b %Y %I:%M:%S GMT")
+
     comment_arr = []
     
-    if request.method == 'GET' and comments is not None:
-        for comment in comments:
-            comment_arr.append(
-                {
-                    "comment" : comment.comment
-                }
-            )
+    if request.method == 'GET':
+        if comments is not None:
+            for comment in comments:
+                comment_arr.append(
+                    {
+                        "comment" : comment.comment
+                        }
+                        )
 
-        resp = jsonify(comment_arr)
-        resp.status_code = 200
-        #resp.headers['Last-Modified'] = str(date_published, "%Y-%m-%d %H:%M:%f"))
+            resp = jsonify(comment_arr)
+            resp.status_code = 200
+            resp.headers['Last-Modified'] = datepub_str
 
-        return resp
-    
-    elif comment is None:
-        return not_found()
+            if request.headers.get("If-Modified-Since") is not None:
+                if request.if_modified_since < datepub_date:
+                    return resp
+                else:
+                    resp.status_code = 304
+                    return resp            
+            else:
+                return resp
+
+        else:
+            return not_found()
 

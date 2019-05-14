@@ -161,7 +161,7 @@ def retrieve_articles(num):
             
             resp = jsonify(articles_msg)
             resp.status_code = 200
-            resp.headers['Last-Modified'] = 
+            resp.headers['Last-Modified'] = lastmod_str
             
             if request.headers.get("If-Modified-Since") is not None:
                 if request.if_modified_since < lastmod_date:
@@ -190,24 +190,23 @@ def retrieve_metadata(num):
 
     if request.method == 'GET':
         if articles is not None:
-            if request.headers.get("If-Modified-Since") is not None:
-
-                for article in articles:
-                    articles_msg.append(
-                        {
-                            "author": article.author,
-                            "title": article.title,
-                            "content": article.content,
-                            "date_published": article.date_published,
-                            "url": "http:localhost/articles/retrieve_metadata/" + str(article.article_id)
-                        }   
-                    )
+            for article in articles:
+                articles_msg.append(
+                    {
+                        "author": article.author,
+                        "title": article.title,
+                        "content": article.content,
+                        "date_published": article.date_published,
+                        "url": "http:localhost/articles/retrieve_metadata/" + str(article.article_id)
+                    }   
+                )
                 
-                resp = jsonify(articles_msg)
-                resp.status_code = 200
-                resp.headers['Last-Modified'] = lastmod_str
-
-                if request.last_modified < lastmod_date:
+            resp = jsonify(articles_msg)
+            resp.status_code = 200
+            resp.headers['Last-Modified'] = lastmod_str
+            
+            if request.headers.get("If-Modified-Since") is not None:
+                if request.if_modified_since < lastmod_date:
                     return resp
                 else:
                     resp.status_code = 304
@@ -216,4 +215,3 @@ def retrieve_metadata(num):
                 return resp
         else:
             return not_found()
-            
