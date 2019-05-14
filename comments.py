@@ -44,7 +44,7 @@ def root():
 
 # curl --include --verbose --header 'Content-Type: application/json' --user "email" --data '{"comment": "new comment"}' http://localhost/comments/new/9581b19d-05ee-40bd-8888-fbf98f0a0579
 # curl --include --verbose --header 'Content-Type: application/json' --user "email" --data '{"comment": "new comment"}' http://localhost/comments/new/5c2dd169-ec3e-456f-9951-0ffd476f25ca
-@app.route('/comments/new/<id>', methods = ['GET', 'POST'])
+@app.route('/comments/new/<id>', methods = ['POST'])
 def new_comment(id):
 
     # query = dbf.query_db("SELECT * FROM articles WHERE article_id=?", [id], one=True)
@@ -88,7 +88,7 @@ def new_comment(id):
             return not_found()
 
 # curl --include --header 'Content-Type: application/json' -X DELETE --user "email" http://localhost/comments/delete/9581b19d-05ee-40bd-8888-fbf98f0a0579/5493d9ef-b638-4f0f-bb6d-a32b21a3075b
-@app.route('/comments/delete/<article_id>/<comment_id>', methods = ['POST', 'GET', 'DELETE'])
+@app.route('/comments/delete/<article_id>/<comment_id>', methods = ['DELETE'])
 # @basic_auth.required
 def delete_comment(article_id,comment_id):
 
@@ -131,7 +131,7 @@ def count_comments(article_id):
         msg = { 'numOfComments': str(num) }
         resp = jsonify(msg)
         resp.status_code = 200
-        resp.headers['Last-Modified'] = str(datetime.strptime(str(comments[0].date_published), "%Y-%m-%d %H:%M:%S.%f"))
+        #resp.headers['Last-Modified'] = str(datetime.strptime(str(comments[0].date_published), "%Y-%m-%d %H:%M:%S.%f"))
 
         return resp
 
@@ -145,7 +145,7 @@ def recent_comments(id, n):
     # Dynamic limit is unsupported in cql?
     stmt = session.prepare("SELECT * FROM testkeyspace.comments WHERE article_url=? LIMIT " + str(n) + " ALLOW FILTERING")
     comments = session.execute(stmt, [url])
-
+    date_published = comments[0].date_published
     comment_arr = []
     
     if request.method == 'GET' and comments is not None:
@@ -158,7 +158,7 @@ def recent_comments(id, n):
 
         resp = jsonify(comment_arr)
         resp.status_code = 200
-        #resp.headers['Last-Modified'] = str(datetime.strptime(comment[0]['date_published'], "%Y-%m-%d %H:%M:%f"))
+        #resp.headers['Last-Modified'] = str(date_published, "%Y-%m-%d %H:%M:%f"))
 
         return resp
     

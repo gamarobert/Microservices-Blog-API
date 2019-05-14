@@ -32,7 +32,7 @@ def summary():
                     title = article['title'],
                     link = "http://localhost/articles/" + str(article['article_id']),
                     author = article['author'],
-                    pubDate = datetime.datetime.strptime(article['date_published'], "%Y-%m-%d %H:%M:%f")
+                    pubDate = datetime.datetime.strptime(str(article['date_published']), "%a, %d %b %Y %H:%M:%S GMT")
                 ))
                  
         feed = Feed(

@@ -4,22 +4,22 @@
 # Resources: https://tavern.readthedocs.io/en/latest/examples.html
 
 # #Users
-# test_name: Change password for user that does not exist
+test_name: Change password for user that does not exist
 
-# stages:
-#   - name: Change password for user that does not exist
-#     request:
-#       url: http://localhost:5001/users/edit_password/
-#       auth:
-#         - "user"
-#         - "password"
-#       json:
-#         password: "newpassword"
-#       method: POST
-#       headers:
-#         content-type: application/json
-#     response:
-#       status_code: 404
+stages:
+  - name: Change password for user that does not exist
+    request:
+      url: http://localhost/users/edit_password/
+      auth:
+        - "email"
+        - "password"
+      json:
+        password: "newpassword"
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 404
   
 # test_name: Create a user, change password, delete user, change password for deleted user
   

@@ -39,49 +39,53 @@ def not_found(error=None):
 #     resp = jsonify(message)
 #     resp.status_code = 304
 
-    # return resp
+#     return resp
 
 @app.route('/articles')
 def root():
     return "testing testing..."
 
-# curl -i --header 'Content-Type: application/json' http://localhost:5000/articles/<id>/
+# curl -i --header 'Content-Type: application/json' http://localhost/articles/66394710-9d34-4418-875f-804083cf849d/
 @app.route('/articles/<id>/', methods=['GET'])
 def article(id):
 
     #query = session.prepare("SELECT * FROM testkeyspace.articles WHERE article_id = ?")
     #articles = session.execute(query, str(id))
+     # is_conditional = request.headers.get('If-Modified-Since') 
+    # or request.headers.get('If-None-Match')
+    
+    # if 'If-Modified-Since' in request.headers:
+    #     if request.if_modified_since > datemod:
+    #         print("Testing", file=sys.stderr)
+
+
+    # print(str(request.headers.get("If-Modifed-Since")), file=sys.stderr)
+
+    # print(str(datemod), file=sys.stderr)
+
     articles = session.execute("SELECT * FROM testkeyspace.articles WHERE article_id ="+str(id))
-
-
-    # articles = dbf.query_db("SELECT * FROM articles WHERE article_id = ?", [id], one=True)
-    datemod = datetime.strptime(articles[0].last_modified, "%Y-%m-%d %H:%M:%S")
-
+    datemod = datetime.strptime(str(articles[0].last_modified), "%Y-%m-%d %H:%M:%S.%f")
     lastmodified = datemod.strftime("%a, %d %b %Y %I:%M:%S GMT")
     
-    is_conditional = request.headers.get('If-Modified-Since') or request.headers.get('If-None-Match')
-
-    if request.method == 'GET' and is_conditional == None:
+    if request.method == 'GET':
         if articles is not None:
-
             message = {
-                "article": articles[0].title
-            }
+                    "article": articles[0].title
+                    }
             resp = jsonify(message)
             resp.status_code = 200
             resp.headers['Last-Modified'] = str(lastmodified)
-            return resp
+
+            if 'If-Modified-Since' in request.headers:
+                if request.if_modified_since < lastmodified:
+                    return resp
+                else:
+                    resp.status_code = 304
+                    return resp      
+            else:
+                return resp                  
         else:
             return not_found()
-    else:
-            message = {
-                'message': 'HTTP 304: Not Modified'
-            }
-            resp = jsonify(message)
-            resp.status_code = 304
-            return resp
-    
-
 
 # curl --include --verbose --request POST --header 'Content-Type: application/json' --user "email" --data '{"title":"Testing Title","content":"TESTINGGG"}' http://localhost/articles/new_article/
 @app.route('/articles/new_article/' , methods=['POST'])
@@ -105,7 +109,7 @@ def new_article():
 
 
 # # curl --include --header 'Content-Type: application/json' --user "email" --data '{"title": "Changed title", "content": "edited content"}' http://localhost/articles/edit_article/6d922c24-cdaf-49b6-8110-edc0c33263c8/
-@app.route('/articles/edit_article/<id>/', methods=['GET', 'POST'])
+@app.route('/articles/edit_article/<id>/', methods=['POST'])
 # @basic_auth.required
 def edit_article(id):
 
@@ -115,10 +119,10 @@ def edit_article(id):
 
         title = request.json['title']
         content = request.json['content']
-
-        stmt = session.prepare("UPDATE testkeyspace.articles SET content=?, last_modified=toTimeStamp(now()), title=? WHERE article_id=" + str(id))
+        date_published = article[0].date_published
+        stmt = session.prepare("UPDATE testkeyspace.articles SET content=?, last_modified=toTimeStamp(now()), title=? WHERE article_id=" + str(id) + " AND date_published=?")
         
-        session.execute(stmt, [content, title])
+        session.execute(stmt, [content, title, date_published])
 
         message = { 'message': 'Article updated!' }
         resp = jsonify(message)
@@ -154,6 +158,8 @@ def retrieve_articles(num):
     # articles = dbf.query_db("SELECT * FROM articles ORDER BY article_id DESC LIMIT (?)", [num])
 
     articles = session.execute("SELECT * FROM testkeyspace.articles LIMIT "+ str(num))
+
+    last_modified = articles[0].last_modified
     # will hold all articles 
     articles_msg = []
 
@@ -172,8 +178,7 @@ def retrieve_articles(num):
         
         resp = jsonify(articles_msg)
         resp.status_code = 200
-        #resp.headers['Last-Modified'] = str(datetime.strptime(articles[0].last_modified, "%Y-%m-%d %H:%M:%f"))
-
+        resp.headers['Last-Modified'] = str(datetime.strptime(str(last_modified), "%Y-%m-%d %H:%M:%S.%f"))
         return resp
 
     elif articles is None:
