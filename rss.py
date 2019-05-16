@@ -19,9 +19,7 @@ def summary():
 
     response = cached_sess.get('http://localhost/articles/retrieve_articles/10/', auth=('email', 'password'))
     articles = response.json()
-    # 
-    # r_articles = requests.get('http://localhost/articles/retrieve_articles/10/', auth=('email', 'password'))
-    # articles = r_articles.json()
+
 
     items = []
     # if r_articles.status_code == 200:
@@ -54,22 +52,25 @@ def summary():
 
 @app.route('/rss/full', methods=['GET'])
 def full():
-    r_articles = requests.get('http://localhost/articles/retrieve_articles/10/', auth=('email', 'password'))
-   
+
+    sess = requests.session()
+    cached_sess = CacheControl(sess)
+
+    r_articles = cached_sess.get('http://localhost/articles/retrieve_articles/10/', auth=('email', 'password'))
+    
     items = []
     if r_articles.status_code == 200:
         articles = r_articles.json()
         for article in articles:
-            r_comments = requests.get('http://localhost/comments/count/' + str(article['article_id']), auth=('email', 'password'))
+            r_comments = cached_sess.get('http://localhost/comments/count/' + str(article['article_id']), auth=('email', 'password'))
             
-            # not sure why its 201 yet, hmm
             if r_comments.status_code == 200:
                 commentCount = r_comments.json()
             else:
                 print(str(r_comments.status_code), file=sys.stderr)
                 return "comments error"
 
-            r_tags = requests.get('http://localhost/tags/all/' + str(article['article_id']), auth=('email', 'password'))
+            r_tags = cached_sess.get('http://localhost/tags/all/' + str(article['article_id']), auth=('email', 'password'))
             
             if r_tags.status_code == 200:
                 allTags = r_tags.json()
@@ -85,7 +86,7 @@ def full():
 
             items.append(
                 Item(
-                    title = article['article_id'],
+                    title = article['title'],
                     author = article['author'],
                     description = article['content'],
                     categories = tags_arr,
@@ -108,15 +109,17 @@ def full():
 
 @app.route('/rss/comments', methods=['GET'])
 def comments():
-    
-    r_articles = requests.get('http://localhost/articles/retrieve_articles/10/' , auth=('email', 'password'))
+    sess = requests.session()
+    cached_sess = CacheControl(sess)
+
+    r_articles = cached_sess.get('http://localhost/articles/retrieve_articles/10/' , auth=('email', 'password'))
        
     if r_articles.status_code == 200:
         articles = r_articles.json()
 
         items = [] 
         for article in articles:
-            r_comments = requests.get('http://localhost/comments/recent/' + str(article['article_id']) + '/10', auth=('email', 'password'))
+            r_comments = cached_sess.get('http://localhost/comments/recent/' + str(article['article_id']) + '/10', auth=('email', 'password'))
             
             if r_comments.status_code == 200:
                 comments = r_comments.json()
@@ -125,6 +128,8 @@ def comments():
                     all_comments.append(
                         comment['comment']
                     )
+            elif r_comments.status_code == 404:
+                pass
             else:
                 print(str(r_comments.status_code), file=sys.stderr)
                 return "comments error"
@@ -132,7 +137,7 @@ def comments():
             items.append(
                 Item(
                     title = article['title'],
-                    pubDate = datetime.datetime.strptime(article['date_published'], "%Y-%m-%d %H:%M:%f"),
+                    pubDate = datetime.datetime.strptime(str(article['date_published']), "%a, %d %b %Y %H:%M:%S GMT"),
                     description =  all_comments
                 ))
         feed = Feed(

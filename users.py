@@ -84,7 +84,7 @@ def register():
         return resp
         
 
-# # curl --include --verbose --request DELETE --user "username" --header 'Content-Type: application/json'  http://localhost:5000/users/delete_user/<int:uid>/
+# # curl --include --verbose --request DELETE --user "username" --header 'Content-Type: application/json'  http://localhost:5000/users/delete_user/<uid>/
 @app.route('/users/delete_user/<uid>/', methods=['DELETE'])
 
 def delete_user(uid):
@@ -104,7 +104,7 @@ def delete_user(uid):
     
     
 
-# curl --include --verbose --header 'Content-Type: application/json' --user "email" --data '{"password": "editedpassword"}' http://localhost/users/edit_password/bc549c9d-99a8-4888-8bf8-5f89a07aa373/
+# curl --include --verbose --header 'Content-Type: application/json' --user "email" --data '{"password": "editedpassword"}' http://localhost/users/edit_password/<uid>/
 @app.route('/users/edit_password/<uid>/', methods=['POST'])
 # @basic_auth.required
 def edit_password(uid):

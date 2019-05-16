@@ -1,8 +1,3 @@
-# Author: Robert Gama: Users, Comments
-# Author: Christine Trujillo: Articles, Tags
-# File: test_server.tavern.yalm
-# Resources: https://tavern.readthedocs.io/en/latest/examples.html
-
 # #Users
 test_name: Change password for user that does not exist
 

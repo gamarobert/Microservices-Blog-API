@@ -32,3 +32,23 @@ Only thing we were able to get working is tags. And RSS on thunderbird
 This will run the test scenarios within the .tavern.yaml
 
 
+student@tuffix-vm:~/Desktop/FinalProj/CPSC476-Project3$ siege -t1m -c25 localhost/rss/full
+** SIEGE 4.0.4
+** Preparing 25 concurrent users for battle.
+The server is now under siege...
+Lifting the server siege...
+Transactions:                    579 hits
+Availability:                 100.00 %
+Elapsed time:                  59.49 secs
+Data transferred:               0.23 MB
+Response time:                  1.82 secs
+Transaction rate:               9.73 trans/sec
+Throughput:                     0.00 MB/sec
+Concurrency:                   17.69
+Successful transactions:         579
+Failed transactions:               0
+Longest transaction:           54.45
+Shortest transaction:           0.00
+ 
+
+

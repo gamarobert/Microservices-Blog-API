@@ -1,12 +1,3 @@
-"""
-    Author: Juan Carrera
-    File: comments.py
-    Resources: 
-        http://blog.luisrei.com/articles/flaskrest.html
-        http://www.sqlitetutorial.net/
-        
-"""
-
 from flask import Flask, logging
 from flask import request, url_for, g, json, jsonify, Response
 from basicauth import SubBasicAuth
@@ -84,10 +75,8 @@ def edit_tag(tag_id):
     elif query[0] is None:
         return not_found()
 
-    else:
-        return "Unsupported media type.. "
 
-# curl --include --header 'Content-Type: application/json' -X DELETE http://localhost/tags/delete/980d08d4-e376-4fe3-a52e-400c29f80604
+# curl --include --header 'Content-Type: application/json' -X DELETE http://localhost/tags/delete/<tag_id>
 @app.route('/tags/delete/<id>', methods = ['POST', 'GET', 'DELETE'])
 def delete_tag(id):
 
@@ -107,21 +96,17 @@ def delete_tag(id):
     elif found_tag[0] is None:
         return not_found()
 
-# curl --include --header 'Content-Type: application/json' -u "email" http://localhost/tags/all/9581b19d-05ee-40bd-8888-fbf98f0a0579 
+# curl --include --header 'Content-Type: application/json' -u "email" http://localhost/tags/all/<article_id>
 @app.route('/tags/all/<string:article_id>', methods=['GET'])
 def tag_for_id(article_id): 
     
     url = "http://localhost/articles/" + article_id
-    
-    # tags = dbf.query_db("SELECT tag_name FROM tags WHERE article_url=?", [url])
+
     stmt = session.prepare("SELECT tag_name FROM tags WHERE article_url=? ALLOW FILTERING")
     tags = session.execute(stmt, [url])
     
     tags_arr = []
 
-
-
-    #if request.headers['Content-Type'] == 'application/json':
     if request.method == 'GET' and tags is not None: 
         for tag in tags:
             tags_arr.append(
@@ -139,7 +124,7 @@ def tag_for_id(article_id):
         return not_found()
 
 
-#curl --include --header 'Content-Type: application/json' -u "email" http://localhost/tags/list_url/tag2
+#curl --include --header 'Content-Type: application/json' -u "email" http://localhost/tags/list_url/<tag>
 @app.route('/tags/list_url/<string:tag>', methods=['GET'])
 
 def list_all_url(tag):

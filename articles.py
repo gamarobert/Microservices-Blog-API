@@ -31,7 +31,7 @@ def not_found(error=None):
 
 @app.route('/articles')
 def root():
-    return "testing testing..."
+    pass
 
 # curl -i --header 'Content-Type: application/json' http://localhost/articles/66394710-9d34-4418-875f-804083cf849d/
 @app.route('/articles/<id>/', methods=['GET'])
