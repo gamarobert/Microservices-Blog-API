@@ -24,6 +24,7 @@ password: password
 This installs requirements for the app.
 
 ### Load Testing
+### sudo apt install --yes siege
 #### siege -c25 -t1m http://localhost/rss/full
 #### Project 2 W/O Caching
 Unfortunately, Siege had an issue with our project 2 when testing with 25 concurrent users.
