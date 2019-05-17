@@ -13,6 +13,9 @@ Change the Default file with our file
 Change ports if need to depending on your configuration
 ### $ sudo service nginx restart
 
+## Database
+### python3 cassandra_create.py
+
 ## Authentication
 When you visit localhost it will ask you to login because of authentication.
 The login that will work is:
