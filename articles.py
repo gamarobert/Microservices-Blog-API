@@ -67,7 +67,7 @@ def article(id):
         else:
             return not_found()
 
-# curl --include --verbose --request POST --header 'Content-Type: application/json' --user "email" --data '{"title":"Testing Title","content":"TESTINGGG"}' http://localhost/articles/new_article/
+# curl --include --verbose --request POST --header 'Content-Type: application/json' --user "email" --data '{"title":"Title","content":"Content"}' http://localhost/articles/new_article/
 @app.route('/articles/new_article/' , methods=['POST'])
 # @basic_auth.required
 def new_article():

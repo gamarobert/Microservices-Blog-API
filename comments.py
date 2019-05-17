@@ -43,7 +43,7 @@ def root():
     pass
 
 
-# curl --include --verbose --header 'Content-Type: application/json' --user "email" --data '{"comment": "new comment"}' http://localhost/comments/new/<article_id>
+# curl --include --verbose --header 'Content-Type: application/json' --user "email" --data '{"comment": "comment"}' http://localhost/comments/new/<article_id>
 @app.route('/comments/new/<id>', methods = ['POST'])
 def new_comment(id):
 

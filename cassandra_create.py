@@ -1,4 +1,5 @@
 from cassandra.cluster import Cluster
+from passlib.hash import sha256_crypt
 
 cluster = Cluster(['172.17.0.2'])
 session = cluster.connect()
@@ -55,81 +56,274 @@ session.execute(
     )"""
 )
 
-# #Referenced used for inserting https://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlInsert.html
-# #Inserting Articles: 
+# user
+password = "password"
+hashed_pw = sha256_crypt.encrypt(password)
 
-# session.execute(
-#     """INSERT INTO articles(
-#         article_id, 
-#         author, 
-#         title,
-#         content,
-#         date_published,
-#         last_modified
-#         ) VALUES (
-#             uuid(),
-#             'John',
-#             'blog 1', 
-#             'foo booso isbos so', 
-#             '2019-03-12 04:53:16',
-#             '2019-04-19 04:53:16'
-#     );"""
-# )
-
-# session.execute(
-#     """INSERT INTO articles(
-#         article_id, 
-#         author, 
-#         title,
-#         content,
-#         date_published,
-#         last_modified
-#         ) VALUES (
-#             uuid(),
-#             'Juan',
-#             'blogger blog', 
-#             'foo booso isbos so', 
-#             '2019-03-12 04:53:16',
-#             '2019-04-19 04:53:16'
-#     );"""
-# )
-
-# session.execute(
-#     """INSERT INTO articles(
-#         article_id, 
-#         author, 
-#         title,
-#         content,
-#         date_published,
-#         last_modified
-#         ) VALUES (
-#             uuid(),
-#             'Robert',
-#             'i am cool heres why', 
-#             'foo booso isbos so', 
-#             '2019-03-12 04:53:16',
-#             '2019-04-19 04:53:16'
-#     );"""
-# )
-
-# #Inster Comments:
-
-# session.execute(
-#     """INSERT INTO comments(
-#         comment_id, 
-#         article_url,
-#         author,
-#         date_published,
-#         comment
-#         ) VALUES (
-#             uuid(),
-#             'Robert',
-#             'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256', 
-#             'foo booso isbos so', 
-#             '2019-03-12 04:53:16',
-#             '2019-04-19 04:53:16'
-#     );"""
-# )
+session.execute(
+    """INSERT INTO users(
+        user_id, 
+        name, 
+        username,
+        email,
+        password
+        ) VALUES (
+            uuid(),
+            'email',
+            'email', 
+            'email@yahoo.com', 
+            """ + str(hashed_pw) + """
+    );"""
+)
 
 
+#Referenced used for inserting https://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlInsert.html
+#Inserting Articles: 
 
+session.execute(
+    """INSERT INTO articles(
+        79f0e9a7-e428-4041-bba1-7fc04a654256, 
+        author, 
+        title,
+        content,
+        date_published,
+        last_modified
+        ) VALUES (
+            uuid(),
+            'Email',
+            'blog 1', 
+            'content', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+
+session.execute(
+    """INSERT INTO articles(
+        article_id, 
+        author, 
+        title,
+        content,
+        date_published,
+        last_modified
+        ) VALUES (
+            uuid(),
+            'Email',
+            'blog 2', 
+            'content', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+
+session.execute(
+    """INSERT INTO articles(
+        article_id, 
+        author, 
+        title,
+        content,
+        date_published,
+        last_modified
+        ) VALUES (
+            uuid(),
+            'Email',
+            'blog 3', 
+            'content', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+
+session.execute(
+    """INSERT INTO articles(
+        article_id, 
+        author, 
+        title,
+        content,
+        date_published,
+        last_modified
+        ) VALUES (
+            uuid(),
+            'Email',
+            'blog 4', 
+            'content', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+
+session.execute(
+    """INSERT INTO articles(
+        article_id, 
+        author, 
+        title,
+        content,
+        date_published,
+        last_modified
+        ) VALUES (
+            uuid(),
+            'Email',
+            'blog 5', 
+            'content', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+
+
+#Inster Comments:
+
+session.execute(
+    """INSERT INTO comments(
+        comment_id, 
+        article_url,
+        author,
+        date_published,
+        comment
+        ) VALUES (
+            uuid(),
+            'Email',
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256', 
+            'comment', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+
+session.execute(
+    """INSERT INTO comments(
+        comment_id, 
+        article_url,
+        author,
+        date_published,
+        comment
+        ) VALUES (
+            uuid(),
+            'Email',
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256', 
+            'comment', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+session.execute(
+    """INSERT INTO comments(
+        comment_id, 
+        article_url,
+        author,
+        date_published,
+        comment
+        ) VALUES (
+            uuid(),
+            'Email',
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256', 
+            'comment', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+session.execute(
+    """INSERT INTO comments(
+        comment_id, 
+        article_url,
+        author,
+        date_published,
+        comment
+        ) VALUES (
+            uuid(),
+            'Email',
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256', 
+            'comment', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+session.execute(
+    """INSERT INTO comments(
+        comment_id, 
+        article_url,
+        author,
+        date_published,
+        comment
+        ) VALUES (
+            uuid(),
+            'Email',
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256', 
+            'comment', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+session.execute(
+    """INSERT INTO comments(
+        comment_id, 
+        article_url,
+        author,
+        date_published,
+        comment
+        ) VALUES (
+            uuid(),
+            'Email',
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256', 
+            'comment', 
+            'toTimeStamp(now())',
+            'toTimeStamp(now())'
+    );"""
+)
+
+# tags
+session.execute(
+    """INSERT INTO comments(
+        tag_id,
+        article_url,
+        tag_name
+        ) VALUES (
+            uuid(),
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256',
+            'tag1'
+    );"""
+)
+session.execute(
+    """INSERT INTO comments(
+        tag_id,
+        article_url,
+        tag_name
+        ) VALUES (
+            uuid(),
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256',
+            'tag2'
+    );"""
+)
+session.execute(
+    """INSERT INTO comments(
+        tag_id,
+        article_url,
+        tag_name
+        ) VALUES (
+            uuid(),
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256',
+            'tag3'
+    );"""
+)
+session.execute(
+    """INSERT INTO comments(
+        tag_id,
+        article_url,
+        tag_name
+        ) VALUES (
+            uuid(),
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256',
+            'tag4'
+    );"""
+)
+session.execute(
+    """INSERT INTO comments(
+        tag_id,
+        article_url,
+        tag_name
+        ) VALUES (
+            uuid(),
+            'http://localhost/articles/79f0e9a7-e428-4041-bba1-7fc04a654256',
+            'tag5'
+    );"""
+)
